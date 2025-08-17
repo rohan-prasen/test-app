@@ -4,7 +4,7 @@ import google.generativeai as genai
 import os
 import fitz # PyMuPDF
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='web')
 CORS(app)
 
 # Configure Gemini API
@@ -47,15 +47,11 @@ def generate_response():
     """
 
     try:
-            response = model.stream([message])
-            def stream():
-                for chunk in response:
-                    yield 'data: %s\n\n' % json.dumps({ "text": chunk.content })
-                    response = model.generate_content(prompt)
-                
-                return jsonify({'response': response.text})
+        response = model.generate_content(prompt)
+        return jsonify({'response': response.text})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 def read_hds_data(person_name):
     """
@@ -78,17 +74,14 @@ def read_hds_data(person_name):
     return hds_text
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-            return stream(), {'Content-Type': 'text/event-stream'}
-
-        except Exception as e:
-            return jsonify({ "error": str(e) })
-
+ app.run(host='0.0.0.0', port=5000)
 
 @app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('web', path)
 
+@app.route('/')
+def serve_index():
+ return send_from_directory('web', 'index.html')
 
-if __name__ == "__main__":
-    app.run(port=int(os.environ.get('PORT', 80)))
+
