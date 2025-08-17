@@ -13,7 +13,7 @@ async function getConversationTips() {
  tipsOutput.textContent = 'Generating tips...';
 
  try {
- const response = await fetch('/generate', {
+ const response = await fetch('/generate', { // Ensure this is a POST to /generate
  method: 'POST',
  headers: {
  'Content-Type': 'application/json',

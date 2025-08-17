@@ -73,15 +73,13 @@ def read_hds_data(person_name):
             return None
     return hds_text
 
-if __name__ == '__main__':
- app.run(host='0.0.0.0', port=5000)
-
 @app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('web', path)
 
 @app.route('/')
 def serve_index():
- return send_from_directory('web', 'index.html')
+    return send_from_directory('web', 'index.html', cache_timeout=0)
 
-
+if __name__ == '__main__':
+ app.run(host='0.0.0.0', port=5000)
