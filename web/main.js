@@ -1,46 +1,35 @@
-import { streamGemini } from './gemini-api.js';
+async function getConversationTips() {
+ const meetingWith = document.getElementById('meetingWith').value;
+ const agenda = document.getElementById('agenda').value;
+ const tipsOutput = document.getElementById('tipsOutput');
 
-let form = document.querySelector('form');
-let promptInput = document.querySelector('input[name="prompt"]');
-let output = document.querySelector('.output');
+ if (!meetingWith || !agenda) {
+ tipsOutput.textContent = 'Please enter both meeting person and agenda.';
+ return;
+ }
 
-form.onsubmit = async (ev) => {
-  ev.preventDefault();
-  output.textContent = 'Generating...';
+ const prompt = `Meeting with ${meetingWith}, Agenda of the meeting... ${agenda}`;
 
-  try {
-    // Load the image as a base64 string
-    let imageUrl = form.elements.namedItem('chosen-image').value;
-    let imageBase64 = await fetch(imageUrl)
-      .then(r => r.arrayBuffer())
-      .then(a => base64js.fromByteArray(new Uint8Array(a)));
+ tipsOutput.textContent = 'Generating tips...';
 
-    // Assemble the prompt by combining the text with the chosen image
-    let contents = [
-      {
-        type: "text",
-        text: promptInput.value,
-      },
-      {
-        type: "image_url",
-        image_url: `data:image/jpeg;base64,${imageBase64}`,
-      },
-    ];
+ try {
+ const response = await fetch('/generate', {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ },
+ body: JSON.stringify({ prompt: prompt }),
+ });
 
-    // Call the multimodal model, and get a stream of results
-    let stream = streamGemini({
-      model: 'gemini-1.5-flash', // or gemini-1.5-pro
-      contents,
-    });
+ const data = await response.json();
 
-    // Read from the stream and interpret the output as markdown
-    let buffer = [];
-    let md = new markdownit();
-    for await (let chunk of stream) {
-      buffer.push(chunk);
-      output.innerHTML = md.render(buffer.join(''));
-    }
-  } catch (e) {
-    output.innerHTML += '<hr>' + e;
-  }
-};
+ if (response.ok) {
+ tipsOutput.textContent = data.response;
+ } else {
+ tipsOutput.textContent = `Error: ${data.error}`;
+ }
+ } catch (error) {
+ tipsOutput.textContent = `Error: ${error}`;
+ }
+}
+
