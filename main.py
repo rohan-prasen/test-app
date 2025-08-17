@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS 
+from flask import Flask, request, jsonify, send_from_directory
 import google.generativeai as genai
 import os
 import fitz # PyMuPDF
